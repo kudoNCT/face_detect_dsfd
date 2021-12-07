@@ -25,7 +25,7 @@ from data import WIDERFace_CLASSES as labelmap
 from data import (WIDERFace_ROOT, WIDERFaceAnnotationTransform,
                   WIDERFaceDetection)
 from face_ssd import build_ssd
-from widerface_val import bbox_vote
+from widerface_val_torch140 import bbox_vote
 
 plt.switch_backend('agg')
 
