@@ -27,24 +27,8 @@ from face_ssd import build_ssd
 
 plt.switch_backend('agg')
 
-parser = argparse.ArgumentParser(description='DSFD: Dual Shot Face Detector')
-parser.add_argument('--trained_model', default='weights/WIDERFace_DSFD_RES152.pth',
-                    type=str, help='Trained state_dict file path to open')
-parser.add_argument('--save_folder', default='eval_tools/WIDERFace_DSFD_RES152_results/', type=str,
-                    help='Dir to save results')
-parser.add_argument('--visual_threshold', default=0.01, type=float,
-                    help='Final confidence threshold')
-parser.add_argument('--cuda', default=True, type=bool,
-                    help='Use cuda to train model')
-parser.add_argument('--widerface_root', default=WIDERFace_ROOT, help='Location of WIDERFACE root directory')
-args = parser.parse_args()
 
-if args.cuda and torch.cuda.is_available():
-    torch.set_default_tensor_type('torch.cuda.FloatTensor')
-else:
-    torch.set_default_tensor_type('torch.FloatTensor')
-if not os.path.exists(args.save_folder):
-    os.mkdir(args.save_folder)
+
 
 def detect_face(image, shrink):
     cuda = args.cuda
@@ -224,20 +208,6 @@ def write_to_txt(f, det , event, im_name):
         f.write('{:.1f} {:.1f} {:.1f} {:.1f} {:.3f}\n'.
                 format(np.floor(xmin), np.floor(ymin), np.ceil(xmax - xmin + 1), np.ceil(ymax - ymin + 1), score))
 
-# load net
-cfg = widerface_640
-num_classes = len(WIDERFace_CLASSES) + 1 # +1 background
-net = build_ssd('test', cfg['min_dim'], num_classes) # initialize SSD
-net.load_state_dict(torch.load(args.trained_model))
-net.cuda()
-net.eval()
-print('Finished loading model!')
-
-# load data
-
-testset = WIDERFaceDetection(args.widerface_root, 'val' , None, WIDERFaceAnnotationTransform())
-#testset = WIDERFaceDetection(args.widerface_root, 'test' , None, WIDERFaceAnnotationTransform())
-
 
 def vis_detections(imgid, im,  dets, thresh=0.5):
     '''Draw detected bounding boxes.'''
@@ -272,8 +242,6 @@ def vis_detections(imgid, im,  dets, thresh=0.5):
     plt.tight_layout()
     plt.savefig('./val_pic_res/'+str(imgid), dpi=fig.dpi)
 
-
-print('Finished loading data')    
 def test_widerface():
     # evaluation
     cuda = args.cuda
@@ -306,6 +274,4 @@ def test_widerface():
             os.makedirs(save_path + event)
         f = open(save_path + event + '/' + img_id.split('.')[0] + '.txt', 'w')
         write_to_txt(f, dets , event, img_id)
-        
-if __name__=='__main__':
-    test_widerface()
+
